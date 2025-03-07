@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Safe Tx Hashes Calculation</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background-color: #f7f9fc;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+        color: #2d3748;
+        margin: 30px 0;
+      }
+
+      h2 {
+        margin: 20px 0;
+      }
+
+      .container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #4a5568;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      textarea:focus {
+        border-color: #4299e1;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+      }
+
+      textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      button {
+        background-color: #4299e1;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #3182ce;
+      }
+
+      #result {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f0fff4;
+        border-left: 4px solid #48bb78;
+        border-radius: 4px;
+      }
+
+      #result pre {
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-family: monospace;
+        font-size: 14px;
+        color: #2d3748;
+        background-color: #edf2f7;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+
+      .error {
+        color: #e53e3e;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .hash-item {
+        margin-bottom: 15px;
+      }
+
+      .hash-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .hash-value {
+        word-break: break-all;
+        background-color: #edf2f7;
+        padding: 8px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+
+      .collapsible {
+        cursor: pointer;
+        color: black;
+        background-color: #f1f5f9;
+        padding: 10px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-weight: bold;
+        margin-top: 15px;
+        border-radius: 4px;
+      }
+
+      .active,
+      .collapsible:hover {
+        background-color: #e2e8f0;
+      }
+
+      .content {
+        padding: 0 18px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+        background-color: #f8fafc;
+      }
+    </style>
+    <!-- sha384-3510198fde03424ddd82db0e6735581db6155750c5905e5084be5147117420b64b8ba390ec2b0c96e9fbe3c0f8d896ce -->
+    <script src="ethers.js"></script>
+  </head>
+  <body>
+    <h1>Safe Tx Hashes Calculation</h1>
+
+    <div class="container">
+      <h2>Required Parameters</h2>
+
+      <form id="txForm">
+        <div class="form-group">
+          <label for="chainId">Chain ID (1 - Ethereum Mainnet)</label>
+          <input
+            type="number"
+            id="chainId"
+            placeholder="Enter the chain ID (e.g. 1 for Ethereum Mainnet)"
+            required
+            value="1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="safeAddress">Safe Address</label>
+          <input
+            type="text"
+            id="safeAddress"
+            placeholder="Enter the safe address (0x...)"
+            required
+          />
+          <div id="safeAddressError" class="error">
+            Please enter a valid safe address
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="toAddress">To Address</label>
+          <input
+            type="text"
+            id="toAddress"
+            placeholder="Enter destination address (0x...)"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="value">Value (in wei)</label>
+          <input
+            type="text"
+            id="value"
+            placeholder="Enter value in wei"
+            required
+            value="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="data">Transaction Data (hex)</label>
+          <textarea
+            id="data"
+            placeholder="Enter transaction data (0x...)"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="operation">Operation (0 - CALL, 1 - DELEGATECALL)</label>
+          <input
+            type="number"
+            id="operation"
+            placeholder="0 - CALL, 1 - DELEGATECALL"
+            required
+            value="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="nonce">Nonce</label>
+          <input type="number" id="nonce" placeholder="Enter nonce" required />
+        </div>
+
+        <h2>Optional Parameters</h2>
+
+        <div class="form-group">
+          <label for="version">Safe Version</label>
+          <input
+            type="text"
+            id="version"
+            placeholder="Enter Safe version (e.g. 1.3.0)"
+            required
+            value="1.3.0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="safeTxGas">Safe Tx Gas</label>
+          <input
+            type="number"
+            id="safeTxGas"
+            placeholder="Enter safe tx gas"
+            required
+            value="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="baseGas">Base Gas</label>
+          <input
+            type="number"
+            id="baseGas"
+            placeholder="Enter base gas"
+            required
+            value="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="gasPrice">Gas Price</label>
+          <input
+            type="number"
+            id="gasPrice"
+            placeholder="Enter gas price"
+            required
+            value="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="gasToken">Gas Token Address</label>
+          <input
+            type="text"
+            id="gasToken"
+            placeholder="Enter gas token address (0x...)"
+            required
+            value="0x0000000000000000000000000000000000000000"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="refundReceiver">Refund Receiver Address</label>
+          <input
+            type="text"
+            id="refundReceiver"
+            placeholder="Enter refund receiver address (0x...)"
+            required
+            value="0x0000000000000000000000000000000000000000"
+          />
+        </div>
+
+        <button type="submit">Generate Hashes</button>
+      </form>
+
+      <div id="result" style="display: none">
+        <h3>Result:</h3>
+
+        <div class="hash-item">
+          <div class="hash-title">Safe Tx Hash:</div>
+          <div id="safeTxHash" class="hash-value"></div>
+        </div>
+
+        <div class="hash-item">
+          <div class="hash-title">Domain Hash:</div>
+          <div id="domainHash" class="hash-value"></div>
+        </div>
+
+        <div class="hash-item">
+          <div class="hash-title">Message Hash:</div>
+          <div id="messageHash" class="hash-value"></div>
+        </div>
+
+        <button type="button" class="collapsible">View Detailed Output</button>
+        <div class="content">
+          <pre id="resultOutput"></pre>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // => `keccak256("EIP712Domain(uint256 chainId,address verifyingContract)");`
+      // See: https://github.com/safe-global/safe-smart-account/blob/a0a1d4292006e26c4dbd52282f4c932e1ffca40f/contracts/Safe.sol#L54-L57.
+      const DOMAIN_SEPARATOR_TYPEHASH =
+        "0x47e79534a245952e8b16893a336b85a3d9ea9fa8c573f3d803afb92a79469218";
+      // => `keccak256("EIP712Domain(address verifyingContract)");`
+      // See: https://github.com/safe-global/safe-smart-account/blob/703dde2ea9882a35762146844d5cfbeeec73e36f/contracts/GnosisSafe.sol#L20-L23.
+      const DOMAIN_SEPARATOR_TYPEHASH_OLD =
+        "0x035aff83d86937d35b32e04f0ddc6ff469290eef2f1b692d8a815c89404d4749";
+      // => `keccak256("SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)");`
+      // See: https://github.com/safe-global/safe-smart-account/blob/a0a1d4292006e26c4dbd52282f4c932e1ffca40f/contracts/Safe.sol#L59-L62.
+      const SAFE_TX_TYPEHASH =
+        "0xbb8310d486368db6bd6f849402fdd73ad53d316b5a4b2644ad6efe0f941286d8";
+      // => `keccak256("SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 dataGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)");`
+      // See: https://github.com/safe-global/safe-smart-account/blob/427d6f7e779431333c54bcb4d4cde31e4d57ce96/contracts/GnosisSafe.sol#L25-L28.
+      const SAFE_TX_TYPEHASH_OLD =
+        "0x14d461bc7412367e924637b363c7bf29b8f47e2f84869f4426e5633d8af47b20";
+      // => `keccak256("SafeMessage(bytes message)");`
+      // See: https://github.com/safe-global/safe-smart-account/blob/febab5e4e859e6e65914f17efddee415e4992961/contracts/libraries/SignMessageLib.sol#L12-L13.
+      const SAFE_MSG_TYPEHASH =
+        "0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca";
+
+      const ethers = window.ethers;
+
+      const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+
+      function calculateHashes(
+        chainId,
+        safeAddress,
+        toAddress,
+        value,
+        data,
+        operation,
+        safeTxGas,
+        baseGas,
+        gasPrice,
+        gasToken,
+        refundReceiver,
+        nonce,
+        version = "1.3.0"
+      ) {
+        const cleanVersion = validateAndGetVersion(version);
+
+        const domainHash = calculateDomainHash(
+          cleanVersion,
+          chainId,
+          safeAddress
+        );
+
+        // Calculate the data hash.
+        // The dynamic value `bytes` is encoded as a `keccak256` hash of its content.
+        // See: https://eips.ethereum.org/EIPS/eip-712#definition-of-encodedata.
+        const dataHash = ethers.keccak256(data);
+
+        /*
+          Safe multisig versions `< 1.0.0` use a legacy (i.e. the parameter value `baseGas` was
+          called `dataGas` previously) `SAFE_TX_TYPEHASH` value. Starting with version `1.0.0`,
+          `baseGas` was introduced: https://github.com/safe-global/safe-smart-account/pull/90.
+        */
+        const safeTxTypeHash =
+          compareVersions(cleanVersion, "1.0.0") < 0
+            ? SAFE_TX_TYPEHASH_OLD
+            : SAFE_TX_TYPEHASH;
+
+        // Encode the message
+        const message = abiCoder.encode(
+          [
+            "bytes32",
+            "address",
+            "uint256",
+            "bytes32",
+            "uint8",
+            "uint256",
+            "uint256",
+            "uint256",
+            "address",
+            "address",
+            "uint256",
+          ],
+          [
+            safeTxTypeHash,
+            toAddress,
+            value,
+            dataHash,
+            operation,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            gasToken,
+            refundReceiver,
+            nonce,
+          ]
+        );
+
+        // Calculate the message hash
+        const messageHash = ethers.keccak256(message);
+
+        const encoded = ethers.solidityPackedKeccak256(
+          ["bytes1", "bytes1", "bytes32", "bytes32"],
+          ["0x19", "0x01", domainHash, messageHash]
+        );
+
+        // Then hash the encoded data with keccak256
+        const safeTxHash = ethers.keccak256(encoded);
+
+        return {
+          transactionData: {
+            chainId,
+            toAddress,
+            safeAddress,
+            value,
+            data,
+            operation,
+            safeTxGas,
+            baseGas,
+            gasPrice,
+            gasToken,
+            refundReceiver,
+            nonce,
+            version,
+            messageEncoded: message,
+          },
+          hashes: {
+            domainHash,
+            messageHash,
+            safeTxHash,
+          },
+        };
+      }
+
+      function validateAndGetVersion(version) {
+        if (!version || typeof version !== "string") {
+          throw new Error("Invalid version format");
+        }
+
+        const versionMatch = version.match(/(\d+\.\d+\.\d+)/);
+        if (!versionMatch) {
+          throw new Error(
+            "Invalid version format: must follow semantic versioning"
+          );
+        }
+
+        return versionMatch[1];
+      }
+
+      function compareVersions(versionA, versionB) {
+        const partsA = versionA.split(".").map(Number);
+        const partsB = versionB.split(".").map(Number);
+
+        for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+          const partA = partsA[i] || 0;
+          const partB = partsB[i] || 0;
+
+          if (partA < partB) return -1;
+          if (partA > partB) return 1;
+        }
+
+        return 0;
+      }
+
+      function calculateDomainHash(version, chainId, address) {
+        let types = ["bytes32", "uint256", "address"];
+        let values = [DOMAIN_SEPARATOR_TYPEHASH, chainId, address];
+
+        // Safe multisig versions `<= 1.2.0` use a legacy (i.e. without `chainId`) `DOMAIN_SEPARATOR_TYPEHASH` value.
+        // Starting with version `1.3.0`, the `chainId` field was introduced: https://github.com/safe-global/safe-smart-account/pull/264.
+        if (compareVersions(version, "1.3.0") < 0) {
+          types = ["bytes32", "address"];
+          values = [DOMAIN_SEPARATOR_TYPEHASH_OLD, address];
+        }
+        return ethers.keccak256(abiCoder.encode(types, values));
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const txForm = document.getElementById("txForm");
+        const result = document.getElementById("result");
+        const resultOutput = document.getElementById("resultOutput");
+        const safeTxHashElement = document.getElementById("safeTxHash");
+        const DomainHashElement = document.getElementById("domainHash");
+        const MessageHashElement = document.getElementById("messageHash");
+        const safeAddressError = document.getElementById("safeAddressError");
+
+        // Set up collapsible sections
+        const coll = document.getElementsByClassName("collapsible");
+        for (let i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            const content = this.nextElementSibling;
+            if (content.style.maxHeight) {
+              content.style.maxHeight = null;
+            } else {
+              content.style.maxHeight = content.scrollHeight + "px";
+            }
+          });
+        }
+
+        txForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Reset error messages
+          safeAddressError.style.display = "none";
+
+          try {
+            // Get form values
+            const chainId = parseInt(document.getElementById("chainId").value);
+            const safeAddress = document
+              .getElementById("safeAddress")
+              .value.trim();
+            const toAddress = document.getElementById("toAddress").value.trim();
+            const value = document.getElementById("value").value.trim();
+            const data = document.getElementById("data").value.trim();
+            const operation = parseInt(
+              document.getElementById("operation").value
+            );
+            const safeTxGas = parseInt(
+              document.getElementById("safeTxGas").value
+            );
+            const baseGas = parseInt(document.getElementById("baseGas").value);
+            const gasPrice = parseInt(
+              document.getElementById("gasPrice").value
+            );
+            const gasToken = document.getElementById("gasToken").value.trim();
+            const refundReceiver = document
+              .getElementById("refundReceiver")
+              .value.trim();
+            const nonce = parseInt(document.getElementById("nonce").value);
+            const version = document.getElementById("version").value.trim();
+
+            // Ensure data starts with 0x
+            const formattedData = data.startsWith("0x") ? data : "0x" + data;
+
+            // Call the calculateHashes function
+            const hashResult = calculateHashes(
+              chainId,
+              safeAddress,
+              toAddress,
+              value,
+              data,
+              operation,
+              safeTxGas,
+              baseGas,
+              gasPrice,
+              gasToken,
+              refundReceiver,
+              nonce,
+              version
+            );
+
+            // Display the hashes
+            safeTxHashElement.textContent = hashResult.hashes.safeTxHash;
+            DomainHashElement.textContent = hashResult.hashes.domainHash;
+            MessageHashElement.textContent = hashResult.hashes.messageHash;
+
+            // Display the full result
+            resultOutput.textContent = JSON.stringify(hashResult, null, 2);
+            result.style.display = "block";
+
+            // Scroll to result
+            result.scrollIntoView({ behavior: "smooth" });
+          } catch (error) {
+            resultOutput.textContent = "Error: " + error.message;
+            result.style.display = "block";
+            console.error(error);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
