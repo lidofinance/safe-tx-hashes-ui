@@ -14,7 +14,7 @@ A simple tool for offline generation of Safe tx hashes
 > [!IMPORTANT]  
 > Use this hashes to compare to the ones we get from terminal or online tools for `index.html` and the `ethers.js` code inside the `<script>` tag
 
-- `index.html` sha-384 (base-64) => `RVT54aNyjWTRp+zRvRw1sbPjtwT/OXvALouqulZhoAk7coMYd5K3+Kv6hS86Gz22`  
+- `index.html` sha-384 (base-64) => `hpYFqduaEpJIfAP0jjGB16I/eGXAoi1BFu+EgBjSV9D1GafJC1cGuswo7s2Ngd77`  
 - Ethers code from the `<script>` tag sha-384 (base-64) => `NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO`  
 
 
