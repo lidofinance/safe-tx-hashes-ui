@@ -16,7 +16,7 @@ A simple tool for offline generation of Safe tx hashes
 
 - `index.html` sha-384 (base-64) => `29B4WUxNSuolRD1yoPcBDJvpA3mfNOfJUotsoB5BzR0ov4uKCERUOaAl/8all6Jk`
 - Ethers code from the `<script>` tag sha-384 (base-64) => `NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO`  
-- IPFS link => TBA
+- IPFS link => https://lido.mypinata.cloud/ipfs/bafybeicnkoqowrk2aehw62qcvzytgaabo3ycz5vmy72svg4dhya3kwtdw4
 - `ethers.umd.min.js` raw file link => https://raw.githubusercontent.com/ethers-io/ethers.js/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js
 
 
