@@ -508,13 +508,11 @@
         // Calculate the message hash
         const messageHash = ethers.keccak256(message);
 
-        const encoded = ethers.solidityPackedKeccak256(
+        // Then hash the encoded data
+        const safeTxHash = ethers.solidityPackedKeccak256(
           ["bytes1", "bytes1", "bytes32", "bytes32"],
           [BYTE, VERSION, domainHash, messageHash]
         );
-
-        // Then hash the encoded data with keccak256
-        const safeTxHash = ethers.keccak256(encoded);
 
         return {
           transactionData: {
