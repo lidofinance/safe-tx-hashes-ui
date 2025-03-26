@@ -9,14 +9,17 @@ A simple tool for offline generation of Safe tx hashes
 > The code was taken from the official `ehters.js` v6 repo ([permalink](https://github.com/ethers-io/ethers.js/blob/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js)) and is used in index.html inside a `<script>` tag  
 > The decision was made to use this ethers file as is, but the validation is required, see the "App validation" section below 
 
+> [!NOTE]
+> We suggest opening the app in a "clean" browser with no external extensions installed and no other tabs open, to avoid external tools affecting the data  
+
 
 ## Validated hashes and links 
 > [!IMPORTANT]  
 > Use this hashes to compare to the ones we get from terminal or online tools for `index.html` and the `ethers.js` code inside the `<script>` tag
 
-- `index.html` sha-384 (base-64) => `29B4WUxNSuolRD1yoPcBDJvpA3mfNOfJUotsoB5BzR0ov4uKCERUOaAl/8all6Jk`
+- `index.html` sha-384 (base-64) => `d2VLr33lpYD+QMl48SZEAVu+wf/ufUBe8cym3SYPMWy0LIJCGX0bCQ0nqwc71J4F`
 - Ethers code from the `<script>` tag sha-384 (base-64) => `NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO`  
-- IPFS link => https://lido.mypinata.cloud/ipfs/bafybeicnkoqowrk2aehw62qcvzytgaabo3ycz5vmy72svg4dhya3kwtdw4
+- IPFS link => https://lido.mypinata.cloud/ipfs/bafybeibuhixxt7rdqxfbuw2tnv3lr6r4qeh4janh3setljbtvwqwtzepsa
 - `ethers.umd.min.js` raw file link => https://raw.githubusercontent.com/ethers-io/ethers.js/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js
 
 
