@@ -9,6 +9,9 @@ A simple tool for offline generation of Safe tx hashes
 > The code was taken from the official `ehters.js` v6 repo ([permalink](https://github.com/ethers-io/ethers.js/blob/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js)) and is used in index.html inside a `<script>` tag  
 > The decision was made to use this ethers file as is, but the validation is required, see the "App validation" section below 
 
+> [!NOTE]
+> We suggest opening the app in a "clean" browser with no external extensions installed and no other tabs open, to avoid external tools affecting the data  
+
 
 ## Validated hashes and links 
 > [!IMPORTANT]  

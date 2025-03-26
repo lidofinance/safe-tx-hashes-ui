@@ -123,6 +123,13 @@
         display: none;
       }
 
+      .warning {
+        color: #ff9800;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
+      }
+
       .hash-item {
         margin-bottom: 15px;
       }
@@ -166,10 +173,6 @@
         transition: max-height 0.2s ease-out;
         background-color: #f8fafc;
       }
-
-      .chain-id-error-message {
-          margin-top: 10px;
-      }
     </style>
     <!-- sha384-NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO -->
     <script>
@@ -193,8 +196,8 @@
             value="1"
             step="1"
           />
-            <div id="chainIdError" class="chain-id-error-message" style="color: red; display: none;">
-                Unsuppirted chain ID.
+            <div id="chainIdError" class="error">
+                Unsupported chain ID.
             </div>
         </div>
 
@@ -250,6 +253,12 @@
             required
             value="0"
           />
+          <div id="operationWarning" class="warning">
+            Note! DELEGATE calls require careful review
+          </div>
+          <div id="unsupportedOperationError" class="error">
+            Unsupported operation type
+          </div>
         </div>
 
         <div class="form-group">
@@ -257,8 +266,32 @@
           <input type="number" id="nonce" placeholder="Enter nonce" required />
         </div>
 
-        <h2>Default Parameters*</h2>
-        <h5>*If these default parameters differs in your transaction - please input parameters from the transaction</h5>
+        <div class="form-group">
+          <label for="domainHashProvided">Domain hash (optional)</label>
+          <input type="text" id="domainHashProvided" placeholder="Domain hash"/>
+          <div id="domainHashProvidedError" class="error">
+            Domain hash mismatch
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="messageHashProvided">Message hash (optional)</label>
+          <input type="text" id="messageHashProvided" placeholder="Message hash"/>
+          <div id="messageHashProvidedError" class="error">
+            Message hash mismatch
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="safeTxHashProvided">Safe TX hash (optional)</label>
+          <input type="text" id="safeTxHashProvided" placeholder="Safe TX hash">
+          <div id="safeTxHashProvidedError" class="error">
+            Safe TX hash mismatch
+          </div>
+        </div>
+
+        <h2>Default Parameters</h2>
+        <h5>If these default parameters differs in your transaction - please input parameters from the transaction</h5>
         <br>
         <div class="form-group">
           <label for="version">Safe Version</label>
@@ -377,10 +410,11 @@
       const SAFE_MSG_TYPEHASH =
         "0x60b3cbf8b4a223d68d641b3b6ddf9a298e7f33710cf3d3a9d1146b5a6150fbca";
 
-      const chainIdError = document.getElementById('chainIdError');
-
       const BYTE = "0x19"; // Prefix to indicate the data is a signed message
       const VERSION = "0x01"; // Version of the EIP-712 signing scheme
+
+      const OPERATION_CALL = 0;
+      const OPERATION_DELEGATECALL = 1;
 
       /**
        *
@@ -590,6 +624,10 @@
         const DomainHashElement = document.getElementById("domainHash");
         const MessageHashElement = document.getElementById("messageHash");
         const safeAddressError = document.getElementById("safeAddressError");
+        const chainIdError = document.getElementById("chainIdError");
+        const domainHashProvidedError = document.getElementById("domainHashProvidedError");
+        const messageHashProvidedError = document.getElementById("messageHashProvidedError");
+        const safeTxHashProvidedError = document.getElementById("safeTxHashProvidedError");
 
         // Set up collapsible sections
         const coll = document.getElementsByClassName("collapsible");
@@ -610,6 +648,11 @@
 
           // Reset error messages
           safeAddressError.style.display = "none";
+          chainIdError.style.display = "none";
+          domainHashProvidedError.style.display = "none";
+          messageHashProvidedError.style.display = "none";
+          safeTxHashProvidedError.style.display = "none";
+
 
           const resultErrorEl = document.getElementById("result-error")
 
@@ -633,6 +676,7 @@
             const operation = parseInt(
               document.getElementById("operation").value
             );
+
             const safeTxGas = parseInt(
               document.getElementById("safeTxGas").value
             );
@@ -646,6 +690,11 @@
               .value.trim();
             const nonce = parseInt(document.getElementById("nonce").value);
             const version = document.getElementById("version").value.trim();
+
+            const domainHashProvided = document.getElementById("domainHashProvided").value
+            const messageHashProvided = document.getElementById("messageHashProvided").value
+            const safeTxHashProvided = document.getElementById("safeTxHashProvided").value
+
             // Ensure data starts with 0x
             const formattedData = data.startsWith("0x") ? data : "0x" + data;
 
@@ -670,6 +719,20 @@
             safeTxHashElement.textContent = hashResult.hashes.safeTxHash;
             DomainHashElement.textContent = hashResult.hashes.domainHash;
             MessageHashElement.textContent = hashResult.hashes.messageHash;
+
+            // Compare with provided hashes
+            if (domainHashProvided !== '' && domainHashProvided !== hashResult.hashes.domainHash) {
+              domainHashProvidedError.style.display = "block"
+            }
+
+            if (messageHashProvided !== '' && messageHashProvided !== hashResult.hashes.messageHash) {
+              messageHashProvidedError.style.display = "block"
+            }
+
+            if (safeTxHashProvided !== '' && safeTxHashProvided !== hashResult.hashes.safeTxHash) {
+              safeTxHashProvidedError.style.display = "block"
+            }
+
             // Display the full result
             resultOutput.textContent = JSON.stringify(hashResult, null, 2);
             result.style.display = "block";
@@ -685,6 +748,9 @@
         });
 
         document.getElementById("chainId").addEventListener('input', function () {
+            if (!this.value) {
+              return chainIdError.style.display = 'none';
+            }
             const value = parseInt(this.value, 10);
 
             if (ALLOWED_CHAIN_IDS.has(value)) {
@@ -692,6 +758,32 @@
             } else {
                 chainIdError.style.display = 'block';
             }
+        })
+
+        document.getElementById("operation").addEventListener('input', function () {
+          const operationWarningEl = document.getElementById("operationWarning")
+          const unsupportedOperationErrorEl = document.getElementById("unsupportedOperationError")
+
+          if (!this.value) {
+            operationWarningEl.style.display = "none";
+            unsupportedOperationErrorEl.style.display = 'none';
+            return;
+          }
+
+          const value = parseInt(this.value, 10);
+
+
+          if ([OPERATION_CALL, OPERATION_DELEGATECALL].indexOf(value) !== -1) {
+            unsupportedOperationErrorEl.style.display = 'none';
+          } else {
+            unsupportedOperationErrorEl.style.display = 'block';
+          }
+
+          if (value === OPERATION_DELEGATECALL) {
+            operationWarningEl.style.display = "block";
+          } else {
+            operationWarningEl.style.display = "none";
+          }
         })
       });
     </script>
