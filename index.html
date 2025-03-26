@@ -720,17 +720,26 @@
             DomainHashElement.textContent = hashResult.hashes.domainHash;
             MessageHashElement.textContent = hashResult.hashes.messageHash;
 
+            let mismatchErrorText = ""
+
             // Compare with provided hashes
             if (domainHashProvided !== '' && domainHashProvided !== hashResult.hashes.domainHash) {
               domainHashProvidedError.style.display = "block"
+              mismatchErrorText += "Domain hash mismatch"
             }
 
             if (messageHashProvided !== '' && messageHashProvided !== hashResult.hashes.messageHash) {
               messageHashProvidedError.style.display = "block"
+              mismatchErrorText += ", Message hash mismatch"
             }
 
             if (safeTxHashProvided !== '' && safeTxHashProvided !== hashResult.hashes.safeTxHash) {
               safeTxHashProvidedError.style.display = "block"
+              mismatchErrorText += ", Safe TX hash mismatch"
+            }
+
+            if (mismatchErrorText !== '') {
+              throw new Error(mismatchErrorText);
             }
 
             // Display the full result
