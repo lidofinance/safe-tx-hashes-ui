@@ -777,6 +777,12 @@
             const safeAddress = document
               .getElementById("safeAddress")
               .value.trim();
+
+            if (!ethers.isAddress(safeAddress)) {
+              safeAddressError.style.display = "block";
+              throw new Error("Invalid safe address");
+            }
+
             let version = versionInput ? versionInput.value.trim() : "1.3.0";
 
             let toAddress;
@@ -828,14 +834,15 @@
               const requireNumericField = (fieldName) => {
                 const rawValue = requireField(fieldName);
                 const valueAsString = String(rawValue).trim();
-                const numericValue = valueAsString.startsWith("0x")
-                  ? parseInt(valueAsString, 16)
-                  : parseInt(valueAsString, 10);
-                if (Number.isNaN(numericValue)) {
+                const isValid =
+                  /^0x[0-9a-fA-F]+$/.test(valueAsString) ||
+                  /^\d+$/.test(valueAsString);
+                if (!isValid) {
                   setJsonError(`Field "${fieldName}" must be a number.`);
                   throw new Error(`Field "${fieldName}" must be a number.`);
                 }
-                return numericValue;
+                // Returned as a decimal string to avoid precision loss for values beyond Number.MAX_SAFE_INTEGER.
+                return BigInt(valueAsString).toString();
               };
 
               toAddress = String(requireField("to")).trim();
@@ -867,20 +874,23 @@
                 document.getElementById("operation").value,
                 10
               );
-              safeTxGas = parseInt(
-                document.getElementById("safeTxGas").value,
-                10
-              );
-              baseGas = parseInt(document.getElementById("baseGas").value, 10);
-              gasPrice = parseInt(
-                document.getElementById("gasPrice").value,
-                10
-              );
+              safeTxGas = document.getElementById("safeTxGas").value.trim();
+              baseGas = document.getElementById("baseGas").value.trim();
+              gasPrice = document.getElementById("gasPrice").value.trim();
               gasToken = document.getElementById("gasToken").value.trim();
               refundReceiver = document
                 .getElementById("refundReceiver")
                 .value.trim();
-              nonce = parseInt(document.getElementById("nonce").value, 10);
+              nonce = document.getElementById("nonce").value.trim();
+            }
+
+            if (
+              Number(operation) !== OPERATION_CALL &&
+              Number(operation) !== OPERATION_DELEGATECALL
+            ) {
+              document.getElementById("unsupportedOperationError").style.display =
+                "block";
+              throw new Error("Unsupported operation type");
             }
 
             // Ensure data starts with 0x
