@@ -17,9 +17,9 @@ A simple tool for offline generation of Safe tx hashes
 > [!IMPORTANT]  
 > Use this hashes to compare to the ones we get from terminal or online tools for `index.html` and the `ethers.js` code inside the `<script>` tag
 
-- `index.html` sha-384 (base-64) => `d2VLr33lpYD+QMl48SZEAVu+wf/ufUBe8cym3SYPMWy0LIJCGX0bCQ0nqwc71J4F`
+- `index.html` sha-384 (base-64) => `dA7RaI3pClxpb+U23x9+YuMDt3RPxusT8VNwZ38+KQwIuqHAeyRpFughjk8WUVSc`
 - Ethers code from the `<script>` tag sha-384 (base-64) => `NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO`  
-- IPFS link => https://lido.mypinata.cloud/ipfs/bafybeibuhixxt7rdqxfbuw2tnv3lr6r4qeh4janh3setljbtvwqwtzepsa
+- IPFS link => https://lido.mypinata.cloud/ipfs/QmQVGnv3b4MsVDGsbuE6bttiiLESpeCYykuRGok7qHd4ji
 - `ethers.umd.min.js` raw file link => https://raw.githubusercontent.com/ethers-io/ethers.js/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js
 
 
