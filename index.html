@@ -384,18 +384,32 @@
         </div>
 
         <div class="form-group">
-          <label for="chainId">Chain ID (1 - Ethereum Mainnet)</label>
-          <input
-            type="number"
-            id="chainId"
-            placeholder="Enter the chain ID (e.g. 1 for Ethereum Mainnet)"
-            required
-            value="1"
-            step="1"
-          />
-          <div id="chainIdError" class="error">
-            Unsupported chain ID.
-          </div>
+          <label for="chainId">Chain ID</label>
+          <select id="chainId" required>
+            <option value="1" selected>Ethereum Mainnet (1)</option>
+            <option value="10">Optimism (10)</option>
+            <option value="56">BSC (Binance Smart Chain) (56)</option>
+            <option value="100">Gnosis (100)</option>
+            <option value="137">Polygon (137)</option>
+            <option value="196">X Layer (196)</option>
+            <option value="324">ZKsync Era (324)</option>
+            <option value="480">World Chain (480)</option>
+            <option value="1101">Polygon zkEVM (1101)</option>
+            <option value="4663">Robinhood Chain (4663)</option>
+            <option value="5000">Mantle (5000)</option>
+            <option value="8453">Base (8453)</option>
+            <option value="10200">Gnosis Chiado (10200)</option>
+            <option value="11155111">Sepolia (11155111)</option>
+            <option value="17000">Holesky (17000)</option>
+            <option value="42161">Arbitrum (42161)</option>
+            <option value="42220">Celo (42220)</option>
+            <option value="43114">Avalanche (43114)</option>
+            <option value="59144">Linea (59144)</option>
+            <option value="81457">Blast (81457)</option>
+            <option value="84532">Base Sepolia (84532)</option>
+            <option value="534352">Scroll (534352)</option>
+            <option value="1313161554">Aurora (1313161554)</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -464,59 +478,6 @@
       const OPERATION_CALL = 0;
       const OPERATION_DELEGATECALL = 1;
 
-      /**
-       *
-       * Arbitrum (identifier: arbitrum, chain ID: 42161)
-       * Aurora (identifier: aurora, chain ID: 1313161554)
-       * Avalanche (identifier: avalanche, chain ID: 43114)
-       * Base (identifier: base, chain ID: 8453)
-       * Base Sepolia (identifier: base-sepolia, chain ID: 84532)
-       * Blast (identifier: blast, chain ID: 81457)
-       * BSC (Binance Smart Chain) (identifier: bsc, chain ID: 56)
-       * Celo (identifier: celo, chain ID: 42220)
-       * Ethereum (identifier: ethereum, chain ID: 1)
-       * Gnosis (identifier: gnosis, chain ID: 100)
-       * Gnosis Chiado (identifier: gnosis-chiado, chain ID: 10200)
-       * Linea (identifier: linea, chain ID: 59144)
-       * Mantle (identifier: mantle, chain ID: 5000)
-       * Optimism (identifier: optimism, chain ID: 10)
-       * Polygon (identifier: polygon, chain ID: 137)
-       * Polygon zkEVM (identifier: polygon-zkevm, chain ID: 1101)
-       * Scroll (identifier: scroll, chain ID: 534352)
-       * Sepolia (identifier: sepolia, chain ID: 11155111)
-       * World Chain (identifier: worldchain, chain ID: 480)
-       * X Layer (identifier: xlayer, chain ID: 196)
-       * ZKsync Era (identifier: zksync, chain ID: 324)
-       * Holesky (identifier: holesky, chain ID: 17000)
-       * Robinhood Chain (identifier: robinhood, chain ID: 4663)
-       *
-       */
-
-      const ALLOWED_CHAIN_IDS = new Set([
-        42161,
-        1313161554,
-        43114,
-        8453,
-        84532,
-        81457,
-        56,
-        42220,
-        1,
-        100,
-        10200,
-        59144,
-        5000,
-        10,
-        137,
-        1101,
-        534352,
-        11155111,
-        480,
-        196,
-        324,
-        17000,
-        4663,
-      ])
       const ethers = window.ethers;
 
       const abiCoder = ethers.AbiCoder.defaultAbiCoder();
@@ -674,7 +635,6 @@
         const DomainHashElement = document.getElementById("domainHash");
         const MessageHashElement = document.getElementById("messageHash");
         const safeAddressError = document.getElementById("safeAddressError");
-        const chainIdError = document.getElementById("chainIdError");
         const resultErrorEl = document.getElementById("result-error");
         const inputModeSelect = document.getElementById("inputMode");
         const manualInputSection = document.getElementById("manualInputSection");
@@ -759,18 +719,11 @@
 
           // Reset error messages
           safeAddressError.style.display = "none";
-          chainIdError.style.display = "none";
           clearJsonError();
 
           try {
             const inputMode = inputModeSelect ? inputModeSelect.value : "manual";
-            const chainIdValue = document.getElementById("chainId").value;
-            const chainId = parseInt(chainIdValue, 10);
-
-            if (!ALLOWED_CHAIN_IDS.has(chainId)) {
-              chainIdError.style.display = "block";
-              throw new Error("Unsupported chain");
-            }
+            const chainId = parseInt(document.getElementById("chainId").value, 10);
 
             const safeAddress = document
               .getElementById("safeAddress")
@@ -929,19 +882,6 @@
             resultErrorEl.textContent = "Error: " + error.message;
           }
         });
-
-        document.getElementById("chainId").addEventListener('input', function () {
-            if (!this.value) {
-              return chainIdError.style.display = 'none';
-            }
-            const value = parseInt(this.value, 10);
-
-            if (ALLOWED_CHAIN_IDS.has(value)) {
-                chainIdError.style.display = 'none';
-            } else {
-                chainIdError.style.display = 'block';
-            }
-        })
 
         document.getElementById("operation").addEventListener('input', function () {
           const operationWarningEl = document.getElementById("operationWarning")
