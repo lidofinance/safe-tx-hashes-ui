@@ -15,12 +15,15 @@ A simple tool for offline generation of Safe tx hashes
 
 ## Validated hashes and links 
 > [!IMPORTANT]  
-> Use this hashes to compare to the ones we get from terminal or online tools for `index.html` and the `ethers.js` code inside the `<script>` tag
+> Use these hashes to compare to the ones we get from terminal or online tools for `index.html` and the `ethers.js` code inside the `<script>` tag
 
 - `index.html` sha-384 (base-64) => `dA7RaI3pClxpb+U23x9+YuMDt3RPxusT8VNwZ38+KQwIuqHAeyRpFughjk8WUVSc`
 - Ethers code from the `<script>` tag sha-384 (base-64) => `NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO`  
 - IPFS link => https://lido.mypinata.cloud/ipfs/QmQVGnv3b4MsVDGsbuE6bttiiLESpeCYykuRGok7qHd4ji
 - `ethers.umd.min.js` raw file link => https://raw.githubusercontent.com/ethers-io/ethers.js/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js
+
+> [!NOTE]
+> These values mirror the constants hardcoded at the top of [`validate.mjs`](./validate.mjs) — `EXPECTED_INDEX_HTML_SHA384`, `EXPECTED_ETHERS_SHA384`, `IPFS_URL` and `ETHERS_UPSTREAM_URL` — which is the source of truth used by the automated validator (see the "App validation" section). Whenever any of them changes (a new release or IPFS upload), update both this section and `validate.mjs` together so they stay in sync.
 
 
 ## Usage
@@ -40,40 +43,32 @@ A simple tool for offline generation of Safe tx hashes
 For this app to be used with IPFS, we prepared a standalone index.html file including the `ethers.umd.min.js` code from
 the [official repo](https://github.com/ethers-io/ethers.js/blob/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js)
 
-As we take the external file code from the Ethers repo and use it as is, we need to be sure nor the IPFS version of index.html file or the ethers code inside the `<script>` tag were modified.
+As we take the external file code from the Ethers repo and use it as is, we need to be sure that neither the IPFS version of the `index.html` file nor the ethers code inside the `<script>` tag were modified.
 
+### Validate with the bundled Node script
 
-### Instructions for obtaining SHA-384 for ethers.js/index.html
-Why needs SHA-384
-Under the mechanism of Subresource Integrity (SRI), a hash (for instance, sha384) is used in the integrity attribute of a `<script>` tag (relevant for external scripts). When the browser loads the script, it checks the file’s integrity by comparing the computed hash to the one specified in the attribute. This prevents the script from being replaced by a malicious version.
+The repo ships a dependency-free validator, [`validate.mjs`](./validate.mjs), that performs the whole check for you. It only needs Node.js (>= 18, for the built-in `fetch`) — there is no `npm install` and no packages to trust; hashing is done in-process with the built-in `node:crypto`.
 
-In this project, the integrity will only be used to verify that the files have not been modified.
+Run every check at once:
 
-### How to get the hash via terminal
+```
+node validate.mjs
+```
 
-As we use standalone `index.html` file for uploading to IPFS we need to check separately whether the ethers code inside the `<script>` tag and the `index.html` file itself are not modified.
+This verifies four things against the expected hashes from the "Validated hashes" section above:
 
-1. Make sure OpenSSL is installed on your system.
-2. In the root directory of the app create an empty `ethers.js` file
-3. Copy the code containing in the `<script>` tag on the line #175 and paste it into the empty `ethers.js` file.
-4. Run the following command to calculate SHA-384 for the ethers.js (example for Unix-like systems):  
-`openssl dgst -sha384 -binary ethers.js | openssl base64 -A && echo`
-5. Now we can compare the hash we got from terminal to the one we have in the "Validated hash" section above. 
-6. Additionally, we can download the ethers [file from the official Ethers repo](https://github.com/ethers-io/ethers.js/blob/ce7212d03d6867081603794f0480f31d053823c4/dist/ethers.umd.min.js).  
-Navigate to the downloaded file directory and run the command `openssl dgst -sha384 -binary ethers.umd.min.js | openssl base64 -A && echo`  
-Now we can compare the hash we got from the terminal and the one we got from the `ethers.js` as well as with the one described in the "Validated hash" section.
-7. Next we need to validate the `index.html` file we got from IPFS the same way, just download the source code of the page and follow the above steps replacing `ethers.js` with the html file name.
+1. the local `index.html` in this repo;
+2. the `ethers.js` `<script>` block embedded inside that `index.html`;
+3. the `index.html` published on IPFS (downloaded automatically from the pinned link);
+4. the upstream `ethers.umd.min.js` from the official Ethers repo (downloaded automatically), proving the embedded copy is the unmodified upstream file.
 
+To check a copy you downloaded yourself — e.g. the `index.html` you saved from an IPFS gateway — instead of letting the script fetch it, pass the path and it is used in place of the IPFS download (checks 1, 2 and 4 still run):
 
-### How to get the hash via Online tool. 
+```
+node validate.mjs --file ./path/to/index.html
+```
 
-We can use [this tool](https://emn178.github.io/online-tools/sha384_file_hash.html), or similar ones calculating the hash of a file from local using SHA384 to compare hashes. 
+The script prints a `PASS`/`FAIL` line per check and exits with: `0` — everything matches; `1` — a hash mismatch (possible tampering); `2` — an operational error (network failure, missing file, unparseable HTML). A tampered file is never reported as a match.
 
-We just need to prepare files (local `ethers.js` file containing the code from the `<script>` tag, html file, (or IPFS link) got from IPFS) and compare hashes to the one described in the 'Validated hashes' section.  
-
-The entire validation process comes to comparing the computed values with the one indicated in the "Validated hash" section.
-
-If the values match, the file has not been altered.
-
-
-
+> [!NOTE]
+> The expected hashes and links are hardcoded as constants at the top of `validate.mjs` and are mirrored in the "Validated hashes" section above — the two must be kept in sync.
