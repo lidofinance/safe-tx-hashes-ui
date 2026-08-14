@@ -16,8 +16,8 @@ const FETCH_TIMEOUT_MS = 15000;
  *   - LOCAL_HTML_PATH        — path to the local index.html in this repo
  */
 
-const EXPECTED_INDEX_HTML_SHA384 = '7phIPZLQG0IV19MLlbvPdw9zzlpprWUUg2Uvj3A26jczgDt46AN6VIBigML77jn7';
-const IPFS_URL = 'https://lido.mypinata.cloud/ipfs/QmY6RXGWeRRy1UL2CzrsesknRHGidyQTnKdyVHZMnBWe7p';
+const EXPECTED_INDEX_HTML_SHA384 = 'cWS8oiufJgkR9TBg/Ikyj40c9XCitKFcDRB7oQ1JRTEvJEoAmfSc8z7XHXynK0Yx';
+const IPFS_URL = 'https://lido.mypinata.cloud/ipfs/QmS2LusBvxVcykeLsA3umeWMrwtni9bPSTC9Lc4NbAaW1V';
 
 // Never change these vars unless the Ethers version is changed.
 const EXPECTED_ETHERS_SHA384 = 'NRAZj94DQk3dgtsOZzVYHbYVV1DFkF5QhL5RRxF0ILZLi6OQ7CsMlun748D42JbO';

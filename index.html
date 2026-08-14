@@ -614,6 +614,25 @@
         return 0;
       }
 
+      // The version <select> lists bands, not exact versions. Assigning an unlisted
+      // value clears the (required) select and blocks every later submit.
+      function versionBand(version) {
+        let cleanVersion;
+        try {
+          cleanVersion = validateAndGetVersion(version);
+        } catch {
+          return null;
+        }
+
+        if (compareVersions(cleanVersion, "1.3.0") >= 0) {
+          return "1.3.0";
+        }
+        if (compareVersions(cleanVersion, "1.0.0") >= 0) {
+          return "1.2.0";
+        }
+        return "0.1.0";
+      }
+
       function calculateDomainHash(version, chainId, address) {
         let types = ["bytes32", "uint256", "address"];
         let values = [DOMAIN_SEPARATOR_TYPEHASH, chainId, address];
@@ -784,6 +803,15 @@
 
               const requireNumericField = (fieldName) => {
                 const rawValue = requireField(fieldName);
+                if (
+                  typeof rawValue === "number" &&
+                  Number.isInteger(rawValue) &&
+                  !Number.isSafeInteger(rawValue)
+                ) {
+                  const message = `Field "${fieldName}" is too large to be a JSON number. Quote it as a string.`;
+                  setJsonError(message);
+                  throw new Error(message);
+                }
                 const valueAsString = String(rawValue).trim();
                 const isValid =
                   /^0x[0-9a-fA-F]+$/.test(valueAsString) ||
@@ -797,7 +825,7 @@
               };
 
               toAddress = String(requireField("to")).trim();
-              value = String(requireField("value")).trim();
+              value = requireNumericField("value");
               data = String(requireField("data")).trim();
               operation = requireNumericField("operation");
               safeTxGas = requireNumericField("safeTxGas");
@@ -813,8 +841,9 @@
                 parsedPayload.version !== ""
               ) {
                 version = String(parsedPayload.version).trim();
-                if (versionInput) {
-                  versionInput.value = version;
+                const band = versionBand(version);
+                if (versionInput && band) {
+                  versionInput.value = band;
                 }
               }
             } else {
