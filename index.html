@@ -66,8 +66,24 @@
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
       }
 
+      select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        background-color: white;
+      }
+
+      select:focus {
+        border-color: #4299e1;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+      }
+
       textarea {
-        min-height: 150px;
+        min-height: 280px;
         resize: vertical;
       }
 
@@ -121,6 +137,13 @@
         font-size: 14px;
         margin-top: 5px;
         display: none;
+      }
+
+      .helper-text {
+        margin-top: 8px;
+        color: #718096;
+        font-size: 14px;
+        line-height: 1.4;
       }
 
       .warning {
@@ -180,25 +203,18 @@
     </script>
   </head>
   <body>
-    <h1>Safe Tx Hashes Calculation</h1>
+    <h1>safeTxHash UI</h1>
 
     <div class="container">
       <h2>Required Parameters</h2>
 
       <form id="txForm">
         <div class="form-group">
-          <label for="chainId">Chain ID (1 - Ethereum Mainnet)</label>
-          <input
-            type="number"
-            id="chainId"
-            placeholder="Enter the chain ID (e.g. 1 for Ethereum Mainnet)"
-            required
-            value="1"
-            step="1"
-          />
-            <div id="chainIdError" class="error">
-                Unsupported chain ID.
-            </div>
+          <label for="inputMode">Input Mode</label>
+          <select id="inputMode">
+            <option value="json" selected>JSON payload</option>
+            <option value="manual">Manual entry</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -214,149 +230,195 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="toAddress">To Address</label>
-          <input
-            type="text"
-            id="toAddress"
-            placeholder="Enter destination address (0x...)"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="value">Value (in wei)</label>
-          <input
-            type="text"
-            id="value"
-            placeholder="Enter value in wei"
-            required
-            value="0"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="data">Transaction Data (hex)</label>
-          <textarea
-            id="data"
-            placeholder="Enter transaction data (0x...)"
-            required
-          ></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="operation">Operation (0 - CALL, 1 - DELEGATECALL)</label>
-          <input
-            type="number"
-            id="operation"
-            placeholder="0 - CALL, 1 - DELEGATECALL"
-            required
-            value="0"
-          />
-          <div id="operationWarning" class="warning">
-            Note! DELEGATE calls require careful review
+        <div id="manualInputSection">
+          <div class="form-group">
+            <label for="toAddress">To Address</label>
+            <input
+              type="text"
+              id="toAddress"
+              placeholder="Enter destination address (0x...)"
+              required
+            />
           </div>
-          <div id="unsupportedOperationError" class="error">
-            Unsupported operation type
+
+          <div class="form-group">
+            <label for="value">Value (in wei)</label>
+            <input
+              type="text"
+              id="value"
+              placeholder="Enter value in wei"
+              required
+              value="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="data">Transaction Data (hex)</label>
+            <textarea
+              id="data"
+              placeholder="Enter transaction data (0x...)"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="operation">Operation (0 - CALL, 1 - DELEGATECALL)</label>
+            <input
+              type="number"
+              id="operation"
+              placeholder="0 - CALL, 1 - DELEGATECALL"
+              required
+              value="0"
+            />
+            <div id="operationWarning" class="warning">
+              Note! DELEGATE calls require careful review
+            </div>
+            <div id="unsupportedOperationError" class="error">
+              Unsupported operation type
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nonce">Nonce</label>
+            <input type="number" id="nonce" placeholder="Enter nonce" required />
+          </div>
+
+          <h2>Default Parameters</h2>
+          <p class="helper-text">
+            If these default parameters differs in your transaction - please input
+            parameters from the transaction
+          </p>
+          <br />
+
+          <div class="form-group">
+            <label for="safeTxGas">Safe Tx Gas</label>
+            <input
+              type="number"
+              id="safeTxGas"
+              placeholder="Enter safe tx gas"
+              required
+              value="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="baseGas">Base Gas</label>
+            <input
+              type="number"
+              id="baseGas"
+              placeholder="Enter base gas"
+              required
+              value="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="gasPrice">Gas Price</label>
+            <input
+              type="number"
+              id="gasPrice"
+              placeholder="Enter gas price"
+              required
+              value="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="gasToken">Gas Token Address</label>
+            <input
+              type="text"
+              id="gasToken"
+              placeholder="Enter gas token address (0x...)"
+              required
+              value="0x0000000000000000000000000000000000000000"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="refundReceiver">Refund Receiver Address</label>
+            <input
+              type="text"
+              id="refundReceiver"
+              placeholder="Enter refund receiver address (0x...)"
+              required
+              value="0x0000000000000000000000000000000000000000"
+            />
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="nonce">Nonce</label>
-          <input type="number" id="nonce" placeholder="Enter nonce" required />
-        </div>
-
-        <div class="form-group">
-          <label for="domainHashProvided">Domain hash (optional)</label>
-          <input type="text" id="domainHashProvided" placeholder="Domain hash"/>
-          <div id="domainHashProvidedError" class="error">
-            Domain hash mismatch
+        <div id="jsonInputSection" style="display: none">
+          <p class="helper-text">
+            Paste the Safe transaction JSON payload containing to, value, data,
+            operation, baseGas, gasPrice, gasToken, refundReceiver, nonce, and
+            safeTxGas.
+          </p>
+          <br />
+          <div class="form-group">
+            <label for="jsonPayload">Safe transaction JSON</label>
+            <textarea
+              id="jsonPayload"
+              placeholder='{
+    "to": "0x...",
+    "value": "0",
+    "data": "0x...",
+    "operation": 0,
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x...",
+    "refundReceiver": "0x...",
+    "nonce": 0,
+    "safeTxGas": "0"
+}'
+            ></textarea>
           </div>
+          <div id="jsonPayloadError" class="error">
+            Invalid JSON payload.
+          </div>
+
+          <h2>Default Parameters</h2>
+          <p class="helper-text">
+            If these default parameters differs in your transaction - please input
+            parameters from the transaction
+          </p>
+          <br />
         </div>
 
         <div class="form-group">
-          <label for="messageHashProvided">Message hash (optional)</label>
-          <input type="text" id="messageHashProvided" placeholder="Message hash"/>
-          <div id="messageHashProvidedError" class="error">
-            Message hash mismatch
-          </div>
+          <label for="chainId">Chain ID</label>
+          <select id="chainId" required>
+            <option value="1" selected>Ethereum Mainnet (1)</option>
+            <option value="10">Optimism (10)</option>
+            <option value="56">BSC (Binance Smart Chain) (56)</option>
+            <option value="100">Gnosis (100)</option>
+            <option value="137">Polygon (137)</option>
+            <option value="196">X Layer (196)</option>
+            <option value="324">ZKsync Era (324)</option>
+            <option value="480">World Chain (480)</option>
+            <option value="1101">Polygon zkEVM (1101)</option>
+            <option value="4663">Robinhood Chain (4663)</option>
+            <option value="5000">Mantle (5000)</option>
+            <option value="8453">Base (8453)</option>
+            <option value="10200">Gnosis Chiado (10200)</option>
+            <option value="11155111">Sepolia (11155111)</option>
+            <option value="17000">Holesky (17000)</option>
+            <option value="42161">Arbitrum (42161)</option>
+            <option value="42220">Celo (42220)</option>
+            <option value="43114">Avalanche (43114)</option>
+            <option value="59144">Linea (59144)</option>
+            <option value="81457">Blast (81457)</option>
+            <option value="84532">Base Sepolia (84532)</option>
+            <option value="534352">Scroll (534352)</option>
+            <option value="1313161554">Aurora (1313161554)</option>
+          </select>
         </div>
 
-        <div class="form-group">
-          <label for="safeTxHashProvided">Safe TX hash (optional)</label>
-          <input type="text" id="safeTxHashProvided" placeholder="Safe TX hash">
-          <div id="safeTxHashProvidedError" class="error">
-            Safe TX hash mismatch
-          </div>
-        </div>
-
-        <h2>Default Parameters</h2>
-        <h5>If these default parameters differs in your transaction - please input parameters from the transaction</h5>
-        <br>
         <div class="form-group">
           <label for="version">Safe Version</label>
-          <input
-            type="text"
-            id="version"
-            placeholder="Enter Safe version (e.g. 1.3.0)"
-            required
-            value="1.3.0"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="safeTxGas">Safe Tx Gas</label>
-          <input
-            type="number"
-            id="safeTxGas"
-            placeholder="Enter safe tx gas"
-            required
-            value="0"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="baseGas">Base Gas</label>
-          <input
-            type="number"
-            id="baseGas"
-            placeholder="Enter base gas"
-            required
-            value="0"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="gasPrice">Gas Price</label>
-          <input
-            type="number"
-            id="gasPrice"
-            placeholder="Enter gas price"
-            required
-            value="0"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="gasToken">Gas Token Address</label>
-          <input
-            type="text"
-            id="gasToken"
-            placeholder="Enter gas token address (0x...)"
-            required
-            value="0x0000000000000000000000000000000000000000"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="refundReceiver">Refund Receiver Address</label>
-          <input
-            type="text"
-            id="refundReceiver"
-            placeholder="Enter refund receiver address (0x...)"
-            required
-            value="0x0000000000000000000000000000000000000000"
-          />
+          <select id="version" required>
+            <option value="1.3.0" selected>1.3.0 or later</option>
+            <option value="1.2.0">1.0.0 - 1.2.0</option>
+            <option value="0.1.0">Before 1.0.0</option>
+          </select>
         </div>
 
         <button type="submit">Generate Hashes</button>
@@ -366,18 +428,18 @@
         <h3>Result:</h3>
 
         <div class="hash-item">
-          <div class="hash-title">Safe Tx Hash:</div>
-          <div id="safeTxHash" class="hash-value"></div>
-        </div>
-
-        <div class="hash-item">
-          <div class="hash-title">Domain Hash:</div>
+          <div class="hash-title">Domain hash</div>
           <div id="domainHash" class="hash-value"></div>
         </div>
 
         <div class="hash-item">
-          <div class="hash-title">Message Hash:</div>
+          <div class="hash-title">Message hash</div>
           <div id="messageHash" class="hash-value"></div>
+        </div>
+
+        <div class="hash-item">
+          <div class="hash-title">safeTxHash</div>
+          <div id="safeTxHash" class="hash-value"></div>
         </div>
 
         <button type="button" class="collapsible">View Detailed Output</button>
@@ -416,59 +478,6 @@
       const OPERATION_CALL = 0;
       const OPERATION_DELEGATECALL = 1;
 
-      /**
-       *
-       * Arbitrum (identifier: arbitrum, chain ID: 42161)
-       * Aurora (identifier: aurora, chain ID: 1313161554)
-       * Avalanche (identifier: avalanche, chain ID: 43114)
-       * Base (identifier: base, chain ID: 8453)
-       * Base Sepolia (identifier: base-sepolia, chain ID: 84532)
-       * Blast (identifier: blast, chain ID: 81457)
-       * BSC (Binance Smart Chain) (identifier: bsc, chain ID: 56)
-       * Celo (identifier: celo, chain ID: 42220)
-       * Ethereum (identifier: ethereum, chain ID: 1)
-       * Gnosis (identifier: gnosis, chain ID: 100)
-       * Gnosis Chiado (identifier: gnosis-chiado, chain ID: 10200)
-       * Linea (identifier: linea, chain ID: 59144)
-       * Mantle (identifier: mantle, chain ID: 5000)
-       * Optimism (identifier: optimism, chain ID: 10)
-       * Polygon (identifier: polygon, chain ID: 137)
-       * Polygon zkEVM (identifier: polygon-zkevm, chain ID: 1101)
-       * Scroll (identifier: scroll, chain ID: 534352)
-       * Sepolia (identifier: sepolia, chain ID: 11155111)
-       * World Chain (identifier: worldchain, chain ID: 480)
-       * X Layer (identifier: xlayer, chain ID: 196)
-       * ZKsync Era (identifier: zksync, chain ID: 324)
-       * Holesky (identifier: holesky, chain ID: 17000)
-       * Robinhood Chain (identifier: robinhood, chain ID: 4663)
-       *
-       */
-
-      const ALLOWED_CHAIN_IDS = new Set([
-        42161,
-        1313161554,
-        43114,
-        8453,
-        84532,
-        81457,
-        56,
-        42220,
-        1,
-        100,
-        10200,
-        59144,
-        5000,
-        10,
-        137,
-        1101,
-        534352,
-        11155111,
-        480,
-        196,
-        324,
-        17000,
-        4663,
-      ])
       const ethers = window.ethers;
 
       const abiCoder = ethers.AbiCoder.defaultAbiCoder();
@@ -605,6 +614,25 @@
         return 0;
       }
 
+      // The version <select> lists bands, not exact versions. Assigning an unlisted
+      // value clears the (required) select and blocks every later submit.
+      function versionBand(version) {
+        let cleanVersion;
+        try {
+          cleanVersion = validateAndGetVersion(version);
+        } catch {
+          return null;
+        }
+
+        if (compareVersions(cleanVersion, "1.3.0") >= 0) {
+          return "1.3.0";
+        }
+        if (compareVersions(cleanVersion, "1.0.0") >= 0) {
+          return "1.2.0";
+        }
+        return "0.1.0";
+      }
+
       function calculateDomainHash(version, chainId, address) {
         let types = ["bytes32", "uint256", "address"];
         let values = [DOMAIN_SEPARATOR_TYPEHASH, chainId, address];
@@ -626,10 +654,70 @@
         const DomainHashElement = document.getElementById("domainHash");
         const MessageHashElement = document.getElementById("messageHash");
         const safeAddressError = document.getElementById("safeAddressError");
-        const chainIdError = document.getElementById("chainIdError");
-        const domainHashProvidedError = document.getElementById("domainHashProvidedError");
-        const messageHashProvidedError = document.getElementById("messageHashProvidedError");
-        const safeTxHashProvidedError = document.getElementById("safeTxHashProvidedError");
+        const resultErrorEl = document.getElementById("result-error");
+        const inputModeSelect = document.getElementById("inputMode");
+        const manualInputSection = document.getElementById("manualInputSection");
+        const jsonInputSection = document.getElementById("jsonInputSection");
+        const jsonPayload = document.getElementById("jsonPayload");
+        const jsonPayloadError = document.getElementById("jsonPayloadError");
+        const versionInput = document.getElementById("version");
+        const manualRequiredInputs = [
+          document.getElementById("toAddress"),
+          document.getElementById("value"),
+          document.getElementById("data"),
+          document.getElementById("operation"),
+          document.getElementById("nonce"),
+          document.getElementById("safeTxGas"),
+          document.getElementById("baseGas"),
+          document.getElementById("gasPrice"),
+          document.getElementById("gasToken"),
+          document.getElementById("refundReceiver"),
+        ].filter(Boolean);
+
+        const setJsonError = (message) => {
+          if (!jsonPayloadError) {
+            return;
+          }
+          jsonPayloadError.textContent = message;
+          jsonPayloadError.style.display = "block";
+        };
+
+        const clearJsonError = () => {
+          if (!jsonPayloadError) {
+            return;
+          }
+          jsonPayloadError.textContent = "";
+          jsonPayloadError.style.display = "none";
+        };
+
+        const toggleInputMode = (event) => {
+          const currentMode = event?.target.value || (inputModeSelect ? inputModeSelect.value : "manual");
+          const isJsonMode = currentMode === "json";
+          if (manualInputSection) {
+            manualInputSection.style.display = isJsonMode ? "none" : "block";
+          }
+          if (jsonInputSection) {
+            jsonInputSection.style.display = isJsonMode ? "block" : "none";
+          }
+          manualRequiredInputs.forEach((input) => {
+            input.required = !isJsonMode;
+          });
+          if (jsonPayload) {
+            jsonPayload.required = isJsonMode;
+          }
+          if (!isJsonMode) {
+            clearJsonError();
+          }
+        };
+
+        if (inputModeSelect) {
+          inputModeSelect.addEventListener("change", toggleInputMode);
+          toggleInputMode();
+        }
+
+        if (jsonPayload) {
+          jsonPayload.addEventListener("input", clearJsonError);
+        }
 
         // Set up collapsible sections
         const coll = document.getElementsByClassName("collapsible");
@@ -650,52 +738,140 @@
 
           // Reset error messages
           safeAddressError.style.display = "none";
-          chainIdError.style.display = "none";
-          domainHashProvidedError.style.display = "none";
-          messageHashProvidedError.style.display = "none";
-          safeTxHashProvidedError.style.display = "none";
-
-
-          const resultErrorEl = document.getElementById("result-error")
+          clearJsonError();
 
           try {
-            // Get form values
-            const chainId = parseInt(document.getElementById("chainId").value);
-
-            // Validate chain id
-            if (!ALLOWED_CHAIN_IDS.has(chainId)) {
-                e.preventDefault();
-                chainIdError.style.display = 'block';
-                throw new Error('Unsupported chain');
-            }
+            const inputMode = inputModeSelect ? inputModeSelect.value : "manual";
+            const chainId = parseInt(document.getElementById("chainId").value, 10);
 
             const safeAddress = document
               .getElementById("safeAddress")
               .value.trim();
-            const toAddress = document.getElementById("toAddress").value.trim();
-            const value = document.getElementById("value").value.trim();
-            const data = document.getElementById("data").value.trim();
-            const operation = parseInt(
-              document.getElementById("operation").value
-            );
 
-            const safeTxGas = parseInt(
-              document.getElementById("safeTxGas").value
-            );
-            const baseGas = parseInt(document.getElementById("baseGas").value);
-            const gasPrice = parseInt(
-              document.getElementById("gasPrice").value
-            );
-            const gasToken = document.getElementById("gasToken").value.trim();
-            const refundReceiver = document
-              .getElementById("refundReceiver")
-              .value.trim();
-            const nonce = parseInt(document.getElementById("nonce").value);
-            const version = document.getElementById("version").value.trim();
+            if (!ethers.isAddress(safeAddress)) {
+              safeAddressError.style.display = "block";
+              throw new Error("Invalid safe address");
+            }
 
-            const domainHashProvided = document.getElementById("domainHashProvided").value
-            const messageHashProvided = document.getElementById("messageHashProvided").value
-            const safeTxHashProvided = document.getElementById("safeTxHashProvided").value
+            let version = versionInput ? versionInput.value.trim() : "1.3.0";
+
+            let toAddress;
+            let value;
+            let data;
+            let operation;
+            let safeTxGas;
+            let baseGas;
+            let gasPrice;
+            let gasToken;
+            let refundReceiver;
+            let nonce;
+
+            if (inputMode === "json") {
+              if (!jsonPayload) {
+                throw new Error("Missing JSON payload element");
+              }
+
+              const rawJsonPayload = jsonPayload.value.trim();
+
+              if (!rawJsonPayload) {
+                setJsonError("Transaction JSON is required.");
+                throw new Error("Transaction JSON is required.");
+              }
+
+              let parsedPayload;
+              try {
+                parsedPayload = JSON.parse(rawJsonPayload);
+              } catch (parseError) {
+                setJsonError(`Invalid JSON: ${parseError.message}`);
+                throw new Error("Invalid JSON payload.");
+              }
+
+              const requireField = (fieldName) => {
+                const fieldValue = parsedPayload[fieldName];
+                if (
+                  fieldValue === undefined ||
+                  fieldValue === null ||
+                  fieldValue === ""
+                ) {
+                  setJsonError(`Field "${fieldName}" is missing in JSON payload.`);
+                  throw new Error(
+                    `Field "${fieldName}" is missing in JSON payload.`
+                  );
+                }
+                return fieldValue;
+              };
+
+              const requireNumericField = (fieldName) => {
+                const rawValue = requireField(fieldName);
+                if (
+                  typeof rawValue === "number" &&
+                  Number.isInteger(rawValue) &&
+                  !Number.isSafeInteger(rawValue)
+                ) {
+                  const message = `Field "${fieldName}" is too large to be a JSON number. Quote it as a string.`;
+                  setJsonError(message);
+                  throw new Error(message);
+                }
+                const valueAsString = String(rawValue).trim();
+                const isValid =
+                  /^0x[0-9a-fA-F]+$/.test(valueAsString) ||
+                  /^\d+$/.test(valueAsString);
+                if (!isValid) {
+                  setJsonError(`Field "${fieldName}" must be a number.`);
+                  throw new Error(`Field "${fieldName}" must be a number.`);
+                }
+                // Returned as a decimal string to avoid precision loss for values beyond Number.MAX_SAFE_INTEGER.
+                return BigInt(valueAsString).toString();
+              };
+
+              toAddress = String(requireField("to")).trim();
+              value = requireNumericField("value");
+              data = String(requireField("data")).trim();
+              operation = requireNumericField("operation");
+              safeTxGas = requireNumericField("safeTxGas");
+              baseGas = requireNumericField("baseGas");
+              gasPrice = requireNumericField("gasPrice");
+              gasToken = String(requireField("gasToken")).trim();
+              refundReceiver = String(requireField("refundReceiver")).trim();
+              nonce = requireNumericField("nonce");
+
+              if (
+                parsedPayload.version !== undefined &&
+                parsedPayload.version !== null &&
+                parsedPayload.version !== ""
+              ) {
+                version = String(parsedPayload.version).trim();
+                const band = versionBand(version);
+                if (versionInput && band) {
+                  versionInput.value = band;
+                }
+              }
+            } else {
+              toAddress = document.getElementById("toAddress").value.trim();
+              value = document.getElementById("value").value.trim();
+              data = document.getElementById("data").value.trim();
+              operation = parseInt(
+                document.getElementById("operation").value,
+                10
+              );
+              safeTxGas = document.getElementById("safeTxGas").value.trim();
+              baseGas = document.getElementById("baseGas").value.trim();
+              gasPrice = document.getElementById("gasPrice").value.trim();
+              gasToken = document.getElementById("gasToken").value.trim();
+              refundReceiver = document
+                .getElementById("refundReceiver")
+                .value.trim();
+              nonce = document.getElementById("nonce").value.trim();
+            }
+
+            if (
+              Number(operation) !== OPERATION_CALL &&
+              Number(operation) !== OPERATION_DELEGATECALL
+            ) {
+              document.getElementById("unsupportedOperationError").style.display =
+                "block";
+              throw new Error("Unsupported operation type");
+            }
 
             // Ensure data starts with 0x
             const formattedData = data.startsWith("0x") ? data : "0x" + data;
@@ -722,28 +898,6 @@
             DomainHashElement.textContent = hashResult.hashes.domainHash;
             MessageHashElement.textContent = hashResult.hashes.messageHash;
 
-            let mismatchErrorText = ""
-
-            // Compare with provided hashes
-            if (domainHashProvided !== '' && domainHashProvided !== hashResult.hashes.domainHash) {
-              domainHashProvidedError.style.display = "block"
-              mismatchErrorText += "Domain hash mismatch"
-            }
-
-            if (messageHashProvided !== '' && messageHashProvided !== hashResult.hashes.messageHash) {
-              messageHashProvidedError.style.display = "block"
-              mismatchErrorText += ", Message hash mismatch"
-            }
-
-            if (safeTxHashProvided !== '' && safeTxHashProvided !== hashResult.hashes.safeTxHash) {
-              safeTxHashProvidedError.style.display = "block"
-              mismatchErrorText += ", Safe TX hash mismatch"
-            }
-
-            if (mismatchErrorText !== '') {
-              throw new Error(mismatchErrorText);
-            }
-
             // Display the full result
             resultOutput.textContent = JSON.stringify(hashResult, null, 2);
             result.style.display = "block";
@@ -757,19 +911,6 @@
             resultErrorEl.textContent = "Error: " + error.message;
           }
         });
-
-        document.getElementById("chainId").addEventListener('input', function () {
-            if (!this.value) {
-              return chainIdError.style.display = 'none';
-            }
-            const value = parseInt(this.value, 10);
-
-            if (ALLOWED_CHAIN_IDS.has(value)) {
-                chainIdError.style.display = 'none';
-            } else {
-                chainIdError.style.display = 'block';
-            }
-        })
 
         document.getElementById("operation").addEventListener('input', function () {
           const operationWarningEl = document.getElementById("operationWarning")
